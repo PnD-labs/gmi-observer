@@ -10,6 +10,8 @@ pub struct DBEnv {
     pub password: String,
     pub name_space: String,
     pub db_name: String,
+    pub db_client_id: String,
+    pub db_client_password: String,
 }
 
 impl DBEnv {
@@ -20,6 +22,8 @@ impl DBEnv {
             password: get_env("DB_PASSWORD"),
             name_space: get_env("DB_NAMESPACE"),
             db_name: get_env("DB_NAME"),
+            db_client_id: get_env("DB_CLIENT_ID"),
+            db_client_password: get_env("DB_CLIENT_PASSWORD"),
         }
     }
 }

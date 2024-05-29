@@ -20,8 +20,7 @@ use tracing::info;
 use self::model::{Chart, ChartData, Swap, SwapEvent, Token, Trade, TradeData};
 
 static POOL_INFO: &str = "POOL_INFO";
-static TRADE: &str = "TRADE";
-static CHART: &str = "CHART";
+
 static TOKEN: &str = "TOKEN";
 static TRADE_DATA: &str = "TRADE_DATA";
 static CHART_DATA: &str = "CHART_DATA";
@@ -37,6 +36,7 @@ impl Database {
     pub async fn new() -> Result<Self> {
         let env = DBEnv::new();
         DB.connect::<Ws>(&env.db_url).await?;
+
         DB.signin(Root {
             username: env.username.as_str(),
             password: env.password.as_str(),
@@ -44,10 +44,21 @@ impl Database {
         .await?;
         DB.use_ns(env.name_space).use_db(env.db_name).await?;
 
+        let sql = format!(
+            "DEFINE USER {} ON DATABASE PASSWORD \"{}\" ROLES VIEWER",
+            env.db_client_id, env.db_client_password
+        );
+        let result = DB.query(sql).await?;
+        match result.check() {
+            Ok(_) => {
+                info!("User defined successfully");
+            }
+            Err(err) => {
+                info!("User already defined {}", err);
+            }
+        }
         Ok(Self { db: DB.clone() })
     }
-
-    // Pool 관련 메서드들
 
     pub async fn save_pool(&self, create_pool_event: CreatePoolEvent) -> Result<()> {
         let pool = PoolInfo::new(create_pool_event);
@@ -177,7 +188,6 @@ impl Database {
 
     // Token 관련 메서드들
 
-    /// Token 데이터를 저장합니다.
     pub async fn save_token(
         &self,
         create_pool_event: CreatePoolEvent,

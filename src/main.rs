@@ -1,16 +1,9 @@
 use anyhow::Result;
 
 use gmi_server::{
-    bot::{
-        amm::AMM,
-        bot::Bot,
-        execute_bot,
-        meme_coin::{CoinData, MemeCoin},
-    },
     db::Database,
     env::{self, get_env},
     observe::{receive_event, subscribe_package_event},
-    pyth::get_sui_price,
     sui,
 };
 use log::info;
@@ -21,7 +14,7 @@ use sui_sdk::{
 };
 use tokio::{
     sync::broadcast::{self, Receiver, Sender},
-    task::{self, JoinSet},
+    task::JoinSet,
 };
 
 #[tokio::main]
@@ -37,7 +30,7 @@ async fn main() -> Result<()> {
     let mut set = JoinSet::new();
     let (event_sender, event_reciver): (Sender<SuiEvent>, Receiver<SuiEvent>) =
         broadcast::channel(100000);
-    set.spawn(execute_bot(sui.clone()));
+    // set.spawn(execute_bot(sui.clone()));
     set.spawn(subscribe_package_event(sui.clone(), event_sender));
     set.spawn(receive_event(sui.clone(), event_reciver, db.clone()));
     // recieve_event(sui.clone(), event_reciver, db.clone()).await?;

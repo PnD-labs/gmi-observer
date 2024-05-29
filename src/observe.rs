@@ -1,8 +1,4 @@
 use crate::{
-    bot::{
-        bot::Bot,
-        meme_coin::{CoinData, MemeCoin},
-    },
     db::{
         model::{CreatePoolEvent, SwapEvent},
         Database,
@@ -10,7 +6,7 @@ use crate::{
     env,
 };
 
-use crate::bot::amm::AMM;
+// use crate::bot::amm::AMM;
 use anyhow::Result;
 use regex::Regex;
 use rust_decimal::Decimal;
