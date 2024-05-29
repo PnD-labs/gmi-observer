@@ -1,5 +1,5 @@
 pub fn get_env(key: &str) -> String {
-    // println!("{:?}", key);
+    println!("{:?}", key);
     std::env::var(key).unwrap()
 }
 
