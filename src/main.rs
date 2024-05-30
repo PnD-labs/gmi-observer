@@ -29,7 +29,7 @@ async fn main() -> Result<()> {
     // info!("Sui client initialized");
     let mut set = JoinSet::new();
     let (event_sender, event_reciver): (Sender<SuiEvent>, Receiver<SuiEvent>) =
-        broadcast::channel(100000);
+        broadcast::channel(100);
     // set.spawn(execute_bot(sui.clone()));
     set.spawn(subscribe_package_event(sui.clone(), event_sender));
     set.spawn(receive_event(sui.clone(), event_reciver, db.clone()));
