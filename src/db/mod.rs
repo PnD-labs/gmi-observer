@@ -8,6 +8,7 @@ use once_cell::sync::Lazy;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use sui_sdk::rpc_types::SuiCoinMetadata;
 use sui_sdk::SuiClient;
+use surrealdb::engine::remote::ws::Wss;
 use surrealdb::sql::Thing;
 use surrealdb::Response;
 use surrealdb::{
@@ -36,7 +37,9 @@ impl Database {
     pub async fn new() -> Result<Self> {
         let env = DBEnv::new();
         info!("db Connect start!");
-        DB.connect::<Ws>(&env.db_url).await?;
+
+        DB.connect::<Wss>(&env.db_url).await?;
+
         info!("db Connect end!");
         DB.signin(Root {
             username: env.username.as_str(),
