@@ -35,8 +35,9 @@ impl Database {
     /// 새로운 Database 인스턴스를 생성합니다.
     pub async fn new() -> Result<Self> {
         let env = DBEnv::new();
+        info!("db Connect start!");
         DB.connect::<Ws>(&env.db_url).await?;
-
+        info!("db Connect end!");
         DB.signin(Root {
             username: env.username.as_str(),
             password: env.password.as_str(),
