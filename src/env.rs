@@ -27,18 +27,3 @@ impl DBEnv {
         }
     }
 }
-
-#[derive(Debug, Clone)]
-pub struct AMMEnv {
-    pub amm_package_id: String,
-    pub amm_config_id: String,
-}
-
-impl AMMEnv {
-    pub fn new() -> Self {
-        AMMEnv {
-            amm_package_id: get_env("AMM_PACKAGE_ID"),
-            amm_config_id: get_env("AMM_CONFIG_ID"),
-        }
-    }
-}
