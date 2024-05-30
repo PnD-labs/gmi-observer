@@ -40,12 +40,14 @@ impl Database {
 
         DB.connect::<Wss>(&env.db_url).await?;
 
-        info!("db Connect end!");
+        info!("DB Connect end!");
+        info!("DB Signin start!");
         DB.signin(Root {
             username: env.username.as_str(),
             password: env.password.as_str(),
         })
         .await?;
+        info!("DB Signin Finish!");
         DB.use_ns(env.name_space).use_db(env.db_name).await?;
 
         let sql = format!(
