@@ -2,6 +2,7 @@ use std::time::Duration;
 
 use sui_sdk::rpc_types::{EventFilter, SuiEvent};
 use sui_sdk::{types::base_types::ObjectID, SuiClient, SuiClientBuilder};
+use tracing::info;
 
 const SUI_MAINNET_HTTPS: &str = "https://fullnode.mainnet.sui.io:443";
 const SUI_MAINNET_WSS: &str = "wss://fullnode.mainnet.sui.io:443";
@@ -31,6 +32,6 @@ pub async fn get_client(build: &str) -> SuiClient {
             .unwrap_or_else(|e| panic!("Failed to build mainnet client: {}", e)),
         _ => panic!("Invalid build type: {}", build),
     };
-
+    info!("Sui Client initialized!");
     client
 }

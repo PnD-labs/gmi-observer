@@ -26,31 +26,26 @@ pub async fn subscribe_package_event(
 ) -> Result<()> {
     info!("Subscribing to package events start");
     let amm_package_id = ObjectID::from_str(&env::get_env("AMM_PACKAGE_ID"))?;
-    loop {
-        let mut event_stream = sui
-            .event_api()
-            .subscribe_event(EventFilter::Package(amm_package_id))
-            .await?;
+    let mut event_stream = sui
+        .event_api()
+        .subscribe_event(EventFilter::Package(amm_package_id))
+        .await?;
 
-        while let Some(event_result) = event_stream.next().await {
-            match event_result {
-                Ok(event) => {
-                    info!("Event Send");
-                    if let Err(e) = event_sender.send(event) {
-                        eprintln!("Error sending event: {:?}", e);
-                    }
-                }
-                Err(e) => {
-                    eprintln!("Error receiving event: {:?}", e);
-                    break; // Exit inner loop and restart subscription
+    while let Some(event_result) = event_stream.next().await {
+        match event_result {
+            Ok(event) => {
+                info!("Event Send");
+                if let Err(e) = event_sender.send(event) {
+                    eprintln!("Error sending event: {:?}", e);
                 }
             }
+            Err(e) => {
+                eprintln!("Error receiving event: {:?}", e);
+            }
         }
-
-        // Log and sleep before retrying subscription
-        info!("Re-subscribing to package events");
-        tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
     }
+    info!("Subscribing to package events end");
+    Ok(())
 }
 
 pub async fn receive_event(
@@ -60,33 +55,29 @@ pub async fn receive_event(
 ) -> Result<()> {
     info!("Receive Event Start");
 
-    loop {
-        match event_receiver.recv().await {
-            Ok(event) => {
-                println!("Receive Event!!\n");
-                let event_name = event.type_.name.to_string();
+    while let Ok(event) = event_receiver.recv().await {
+        println!("Receive Event!!\n");
+        let event_name = event.type_.name.to_string();
 
-                match event_name.as_str() {
-                    "CreatePoolEvent" => {
-                        if let Err(e) = create_pool_event(sui.clone(), db.clone(), event).await {
-                            eprintln!("Error handling CreatePoolEvent: {:?}", e);
-                        }
-                    }
-                    "SwapEvent" => {
-                        if let Err(e) = control_swap_event(sui.clone(), db.clone(), event).await {
-                            eprintln!("Error handling SwapEvent: {:?}", e);
-                        }
-                    }
-                    _ => {
-                        eprintln!("Unknown Event: {}", event_name);
-                    }
+        match event_name.as_str() {
+            "CreatePoolEvent" => {
+                if let Err(e) = create_pool_event(sui.clone(), db.clone(), event).await {
+                    eprintln!("Error handling CreatePoolEvent: {:?}", e);
                 }
             }
-            Err(e) => {
-                eprintln!("Error receiving from channel: {:?}", e);
+            "SwapEvent" => {
+                if let Err(e) = control_swap_event(sui.clone(), db.clone(), event).await {
+                    eprintln!("Error handling SwapEvent: {:?}", e);
+                }
+            }
+            _ => {
+                eprintln!("Unknown Event: {}", event_name);
             }
         }
     }
+
+    info!("Channel Closed, exiting loop");
+    Ok(())
 }
 
 /// 스왑 이벤트 제어 함수
